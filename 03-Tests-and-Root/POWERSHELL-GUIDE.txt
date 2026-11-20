@@ -1,0 +1,132 @@
+TSA4 SCREENSHOT AND POWERSHELL GUIDE
+
+PROJECT
+C:\Users\inah\Documents\ChatGPT\Solar US\tasks-today-tsa4
+
+FULL GITHUB UPLOAD FOLDER
+C:\Users\inah\Documents\ChatGPT\Solar US\TSA4-GitHub-Upload
+
+SMALLER GITHUB UPLOAD BATCHES
+C:\Users\inah\Documents\ChatGPT\Solar US\TSA4-GitHub-Batches
+
+REPOSITORY NAME
+it0049-tsa4-tasks-crud-auth-email
+
+OPEN POWERSHELL IN THE PROJECT
+Set-Location -LiteralPath 'C:\Users\inah\Documents\ChatGPT\Solar US\tasks-today-tsa4'
+
+START THE SERVER IF IT IS NOT ALREADY RUNNING
+php artisan serve --host=127.0.0.1 --port=8004
+
+Visit http://127.0.0.1:8004. Keep the server window open.
+Stop with Ctrl+C. Use another PowerShell window for the checks below.
+
+FIRST LOGIN
+Register your own username, full name, lowercase email, and password
+at /register. The password needs at least 8 characters.
+Login uses your EMAIL and password. There is no preset shared login.
+
+RECOMMENDED SCREENSHOTS
+The activity does not prescribe a screenshot count.
+
+1. PUBLIC PAGES WHILE LOGGED OUT
+Capture Welcome, Task List, Profile, and About.
+The task lists should not show Create/Edit/Archive controls for guests.
+Caption: The four original pages remain accessible without authentication.
+
+2. PROTECTED MANAGEMENT PAGE
+While logged out, enter /tasks/create. It redirects to /login.
+Capture the login page with its URL.
+Optional redirect proof:
+curl.exe -s -I http://127.0.0.1:8004/tasks/create | Select-String '^(HTTP/|Location:)'
+Caption: Task management routes require an authenticated session.
+
+3. REGISTER OR LOG IN
+Register your own account, then capture the signed-in task list with
+Create task, Edit, Archive, and Log out visible.
+Do not reveal your password.
+Caption: Breeze authentication enables task-management actions.
+
+4. CREATE TASK AND VALIDATION
+Open /tasks/create.
+For a Laravel validation screenshot, enter THREE SPACES as the title,
+choose a valid date, select In progress, and submit.
+The server trims the title and rejects it while preserving the date/status.
+Then enter a real title and save.
+Caption: Task forms validate required fields and preserve entered values.
+
+5. EDIT AN EXISTING TASK
+Open a task's Edit page, capture its prefilled values, change its title or
+date, and save. Capture the changed record.
+Caption: An authenticated user can update existing task records.
+
+6. REQUIRED EMAIL FLOW
+Create a PENDING task titled: Email proof task
+Choose today's date. Save it.
+Open its Edit page and change Status to DONE, then Save changes.
+Capture the task list with its Done status and success message.
+Caption: Updating a pending task to done generates a completion email.
+
+7. EMAIL LOG EVIDENCE
+Open another PowerShell window in the project directory, then run:
+Get-Content -LiteralPath '.\storage\logs\task-mail.log' -Tail 45
+
+Capture the completion email's recipient, subject, and task information.
+Mail is logged locally; it is not sent to a real inbox.
+Caption: Laravel Mail generates the task-completed notification for the configured recipient.
+
+8. PROVE NO REPEAT EMAIL
+In that same PowerShell window, run:
+$beforeCount = (Select-String -Path '.\storage\logs\task-mail.log' -SimpleMatch 'Subject: Task completed: Email proof task').Count
+"Emails before resave: $beforeCount"
+
+In the browser, Edit Email proof task again and save it with status still Done.
+Do not reopen it to pending for this check.
+Return to the SAME PowerShell window and run:
+$afterCount = (Select-String -Path '.\storage\logs\task-mail.log' -SimpleMatch 'Subject: Task completed: Email proof task').Count
+"Emails after resave: $afterCount"
+
+Capture both counts. They should be the same.
+Caption: Saving an already-done task does not resend its completion notification.
+
+9. SOFT DELETE THROUGH ARCHIVING
+Choose a fictional disposable task, expand Archive, tick Confirm archive,
+and click Archive task. Capture its success message and disappearance.
+Then run:
+php artisan tasks:summary
+
+Capture the stored row with Archived = yes and the active/archived counts.
+Caption: Archiving sets is_archived while preserving the database record.
+
+10. CHECKS
+php artisan migrate:status
+php artisan route:list --path=tasks -v
+php artisan test
+Capture the migrations, protected route middleware, and passing tests.
+
+OPTIONAL CODE EVIDENCE
+- TaskRequest validation rules.
+- TaskController update action with its old/new status comparison and Mail facade.
+- TaskCompleted Mailable and resources/views/mail/task-completed.blade.php.
+- is_archived migration and Task::active scope.
+- routes/web.php showing public pages and protected management actions.
+- .env.example mail settings, with placeholder values only.
+
+GITHUB BATCH UPLOAD
+Create repository it0049-tsa4-tasks-crud-auth-email.
+Upload everything INSIDE 01-Core, then commit.
+Next upload everything INSIDE 02-Views-and-Storage to the SAME repository, then commit.
+Finally upload everything INSIDE 03-Tests-and-Root, then commit.
+Do not upload the numbered folders themselves.
+Include hidden files such as .gitignore and .env.example.
+
+The full TSA4-GitHub-Upload folder has the same source files if you prefer
+to use Git rather than browser uploads.
+
+SUBMISSION
+Include the actual repository URL and hosted working HTTPS URL after deployment.
+Localhost does not replace the hosted link.
+
+Use a wide browser window and Win+Shift+S.
+Do not capture .env, passwords, app keys, credentials, sessions,
+or password-reset links. Do not upload logs or your SQLite database.
